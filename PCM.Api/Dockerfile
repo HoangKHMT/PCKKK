@@ -1,12 +1,17 @@
-﻿# Build stage
+﻿# ===== BUILD STAGE =====
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["PCM.Api.csproj", "./"]
-RUN dotnet restore
-COPY . .
-RUN dotnet publish -c Release -o /app/publish
 
-# Runtime stage
+# Copy csproj và restore
+COPY ["PCM.Api/PCM.Api.csproj", "PCM.Api/"]
+RUN dotnet restore "PCM.Api/PCM.Api.csproj"
+
+# Copy toàn bộ source
+COPY . .
+WORKDIR "/src/PCM.Api"
+RUN dotnet publish "PCM.Api.csproj" -c Release -o /app/publish
+
+# ===== RUNTIME STAGE =====
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
